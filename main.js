@@ -1,5 +1,6 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
+const fs = require('fs');
 
 let mainWindow;
 let gameOpened = false;
@@ -22,7 +23,7 @@ function createWindow() {
     title: 'Operação: Zona Morta — Atualizador',
     backgroundColor: '#05090b', autoHideMenuBar: true,
     resizable: false,
-    webPreferences: { contextIsolation: true, nodeIntegration: false }
+    webPreferences: { contextIsolation: true, nodeIntegration: false, preload: path.join(__dirname, 'preload.js') }
   });
   mainWindow.removeMenu();
   mainWindow.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(splashHtml));
@@ -120,6 +121,11 @@ async function configureAutoUpdates() {
     setTimeout(openGame, 900);
   }
 }
+
+ipcMain.handle('load-human-model', async () => {
+  const filePath = path.join(__dirname, 'assets', 'human-base-rigged.glb');
+  return fs.promises.readFile(filePath);
+});
 
 app.whenReady().then(async () => {
   createWindow();
