@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Operação: Zona Morta — Edição Inferno FPS 3D</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#05090b;color:#edf4ee;font-family:Arial,Helvetica,sans-serif}canvas{display:block}
+#hud{position:fixed;inset:0;pointer-events:none;display:none;text-shadow:0 2px 4px #000}
+.panel{background:#07100dd9;border:1px solid #b6e94366;padding:10px 13px;clip-path:polygon(0 0,100% 0,100% 82%,93% 100%,0 100%)}
+.top{position:absolute;top:16px;left:16px;right:16px;display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.brand{font-weight:1000;letter-spacing:2px;font-size:clamp(15px,2vw,24px);color:#d7ff57}.small{font-size:10px;letter-spacing:2px;color:#a9b8ad;margin-bottom:5px}.wave{font-size:23px;font-weight:900}.right{display:flex;gap:8px;text-align:right}.big{font-size:23px;font-weight:900}
+.bottom{position:absolute;bottom:16px;left:16px;right:16px;display:flex;align-items:flex-end;justify-content:space-between;gap:10px}.health{width:min(300px,38vw)}.bar{height:10px;background:#29332d;border:1px solid #71806f;margin-top:6px}.bar div{height:100%;width:100%;background:#bfff43}.ammo{text-align:right;min-width:170px}.ammoNum{font-size:clamp(27px,4vw,43px);font-weight:1000}.ammoNum span{font-size:16px;color:#aebbb0}.center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center}.cross{width:18px;height:18px;position:relative}.cross:before,.cross:after{content:"";position:absolute;background:#d7ff57;box-shadow:0 0 5px #000}.cross:before{width:2px;height:18px;left:8px}.cross:after{height:2px;width:18px;top:8px}.hint{position:absolute;bottom:92px;left:50%;transform:translateX(-50%);background:#07100dd9;padding:8px 12px;border:1px solid #71806f;font-size:12px;white-space:nowrap}
+#toast{position:absolute;top:22%;left:50%;transform:translateX(-50%);font-size:clamp(20px,4vw,36px);font-weight:1000;letter-spacing:3px;color:#d7ff57;opacity:0;text-align:center;transition:opacity .2s}
+.overlay{position:fixed;inset:0;z-index:4;display:flex;align-items:center;justify-content:center;padding:18px;overflow:auto;background:radial-gradient(ellipse at center,#14231ddd,#030607f5)}
+.card{width:min(760px,100%);padding:clamp(22px,4vw,38px);background:#08100ff2;border:1px solid #79945d;box-shadow:0 0 70px #000;position:relative}.card:before{content:"";position:absolute;top:0;left:0;width:100px;height:4px;background:#d7ff57}
+.kicker{font-size:11px;letter-spacing:4px;color:#d7ff57;font-weight:900}h1{font-size:clamp(34px,6vw,65px);line-height:.92;letter-spacing:-2px;margin:13px 0;text-transform:uppercase}h1 em{font-style:normal;color:#d7ff57}p{color:#bdc9c0;line-height:1.55}.row{display:flex;gap:25px;flex-wrap:wrap;margin-top:22px}.grow{flex:1 1 260px}.skins{display:flex;gap:8px;margin-top:10px}.skin{flex:1;cursor:pointer;background:#121c18;color:#eee;border:1px solid #40513f;padding:10px 4px;font-size:11px;font-weight:bold}.skin.active{border-color:#d7ff57;box-shadow:inset 0 0 0 1px #d7ff57}.swatch{height:35px;margin-bottom:7px;background:linear-gradient(135deg,#9aab83 0 30%,#2d3d2d 30% 65%,#68765a 65%)}.skin:nth-child(2) .swatch{background:linear-gradient(135deg,#8ed8ff 0 30%,#29496a 30% 65%,#bedcf0 65%)}.skin:nth-child(3) .swatch{background:linear-gradient(135deg,#d9ac70 0 30%,#65412d 30% 65%,#e6d1a2 65%)}
+button{font:inherit;font-weight:900;letter-spacing:1px;cursor:pointer;text-transform:uppercase}.primary{width:100%;margin-top:24px;padding:16px;background:#d7ff57;color:#10150c;border:0}.secondary{width:100%;margin-top:9px;padding:12px;background:#18221d;border:1px solid #60725b;color:#fff}.controls{font-size:12px;line-height:1.9;color:#c1ccc3}.controls b{color:#d7ff57}.note{font-size:11px;color:#839187;margin-top:14px}.section-label{font-size:10px;letter-spacing:3px;color:#d7ff57;font-weight:900;margin-top:16px}.skins{flex-wrap:wrap}.skin{min-width:95px}.skin .swatch{position:relative;overflow:hidden}.skin .swatch:after{content:"";display:block;width:20px;height:28px;margin:3px auto;background:linear-gradient(90deg,#141817,#64715e,#202722);border-radius:5px;box-shadow:0 0 0 2px #101410}.skin:nth-child(2) .swatch:after{background:linear-gradient(90deg,#172638,#7dbde4,#20394c)}.skin:nth-child(3) .swatch:after{background:linear-gradient(90deg,#3d291d,#d3a76b,#5a3b29)}.skin:nth-child(4) .swatch{background:linear-gradient(135deg,#a8b4b0 0 30%,#252d30 30% 65%,#78868a 65%)}.skin:nth-child(5) .swatch{background:linear-gradient(135deg,#342c41 0 30%,#8e4e8c 30% 65%,#d29ed0 65%)}.skin:nth-child(6) .swatch{background:linear-gradient(135deg,#4b1419 0 30%,#16191c 30% 65%,#9b3034 65%)}.weapon-skins{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.weapon-skin{flex:1;min-width:90px;background:#121c18;color:#d8e2da;border:1px solid #40513f;padding:9px 6px;font-size:10px}.weapon-skin.active{border-color:#d7ff57;color:#d7ff57}.tag{display:inline-block;border:1px solid #71806f;padding:3px 6px;margin:2px;font-size:9px;letter-spacing:1px;color:#c4d1c7}
+@media(max-width:560px){.top{top:8px;left:8px;right:8px}.bottom{left:8px;right:8px;bottom:8px}.panel{padding:7px}.health{width:40vw}.ammo{min-width:110px}.hint{bottom:78px;font-size:10px}.right{gap:5px}}
+</style>
+</head>
+<body>
+<div id="hud">
+ <div class="top">
+  <div class="panel"><div class="small">PROTOCOLO DE CONTENÇÃO</div><div class="brand">OPERAÇÃO: ZONA MORTA</div><div class="small">EDIÇÃO INFERNO // FPS 3D</div></div>
+  <div class="right"><div class="panel"><div class="small">ONDA</div><div id="wave" class="wave">01</div><div class="small">ZUMBIS: <span id="left">0</span></div></div><div class="panel"><div class="small">PONTUAÇÃO</div><div id="score" class="big">00000</div><div class="small">ELIMINAÇÕES: <span id="kills">0</span></div></div></div>
+ </div>
+ <div class="center"><div class="cross"></div></div>
+ <div class="hint" id="hint">WASD mover · Mouse mirar · Clique atirar · R recarregar · Shift correr · Esc pausar</div>
+ <div class="bottom"><div class="panel health"><div class="small">INTEGRIDADE DO OPERADOR <span id="hptext">100%</span></div><div class="bar"><div id="hpbar"></div></div><div class="small" style="margin-top:8px">SOBREVIVA À HORDA</div></div><div class="panel ammo"><div class="small">RIFLE TÁTICO</div><div class="ammoNum"><span id="mag">30</span> <span>/ <b id="reserve">120</b></span></div><div class="small">M4 // CALIBRE 5.56</div></div></div>
+ <div id="toast"></div>
+</div>
+<div class="overlay" id="menu"><div class="card">
+ <div class="kicker">ARQUIVO 09 // ZONA DE CONTENÇÃO</div><h1>OPERAÇÃO:<br><em>ZONA MORTA</em></h1>
+ <p>Entre numa zona industrial tomada por infectados, em um jogo de tiro <b>3D em primeira pessoa</b>. Aguente ondas cada vez maiores, conserve munição e use o cenário para ganhar tempo.</p>
+ <div class="row"><div class="grow"><div class="kicker">ESCOLHA SUA SKIN</div><div class="skins">
+ <button class="skin active" data-skin="0"><div class="swatch"></div>GHOST / CAMO</button><button class="skin" data-skin="1"><div class="swatch"></div>FROST / BLUE</button><button class="skin" data-skin="2"><div class="swatch"></div>EMBER / DESERT</button><button class="skin" data-skin="3"><div class="swatch"></div>RAVEN / STEEL</button><button class="skin" data-skin="4"><div class="swatch"></div>VOID / NEON</button><button class="skin" data-skin="5"><div class="swatch"></div>INFERNO / BLOOD</button>
+ </div><div class="section-label">ACABAMENTO DO RIFLE</div><div class="weapon-skins"><button class="weapon-skin active" data-weapon="0">MATTE TACTICAL</button><button class="weapon-skin" data-weapon="1">TOXIC NEON</button><button class="weapon-skin" data-weapon="2">BLOOD RUST</button><button class="weapon-skin" data-weapon="3">FROST STEEL</button></div></div><div class="grow"><div class="kicker">CONTROLES</div><div class="controls"><b>W A S D</b> — movimentar · <b>MOUSE</b> — mirar<br><b>CLIQUE ESQUERDO</b> — atirar · <b>R</b> — recarregar<br><b>SHIFT</b> — correr · <b>ESC</b> — soltar/retomar mouse</div></div></div>
+ <button class="primary" id="start">INICIAR OPERAÇÃO →</button><div class="note">O jogo usa Three.js via CDN; é necessário estar conectado à internet para carregar os gráficos 3D. Personagens, armas e cenário são originais e estilizados.</div>
+ </div></div>
+<div class="overlay" id="end" style="display:none"><div class="card" style="max-width:520px;text-align:center"><div class="kicker">SINAL PERDIDO</div><h1>OPERADOR<br><em>NEUTRALIZADO</em></h1><p id="endText"></p><button class="primary" id="again">TENTAR NOVAMENTE ↻</button><button class="secondary" id="back">VOLTAR AO MENU</button></div></div>
+<script src="./node_modules/three/build/three.min.js"></script>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id);let scene,camera,renderer,clock,player,weapon,weaponGroup,raycaster;
+let started=false,dead=false,paused=false,chosenSkin=0,keys={},zombies=[],bullets=[],obstacles=[],decor=[],wave=1,kills=0,score=0,spawnLeft=0,spawnClock=0,mag=30,reserve=120,reloadTime=0,fireTime=0,damageFlash=0,hitCooldown=0,moveSpeed=5.5;
+const skins=[{body:0x53684b,vest:0x29372b,accent:0xc8ff3d},{body:0x477ba0,vest:0x1d3448,accent:0x76d8ff},{body:0x9a6541,vest:0x4b3023,accent:0xffc46a},{body:0x87918f,vest:0x252d30,accent:0xd5e6e2},{body:0x6f3c78,vest:0x211b2b,accent:0xff7cf3},{body:0x762c2f,vest:0x19191b,accent:0xff3b47}];
+const weaponFinishes=[{body:0x171c1a,metal:0x46514b,accent:0x252a25},{body:0x17221b,metal:0x92e83e,accent:0x263a22},{body:0x29191a,metal:0x8f3935,accent:0x201718},{body:0x1b252d,metal:0xa7d8ef,accent:0x283944}];let chosenWeapon=0;
+const mat=(color,roughness=.85,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
+const materials={floor:mat(0x252d2a),wall:mat(0x3e4943),dark:mat(0x151c19),crate:mat(0x4d5546),metal:mat(0x66736b,.5,.55),glow: new THREE.MeshBasicMaterial({color:0xd7ff57}),blood:mat(0x6f2926),zskin:mat(0x87927c),cloth:mat(0x394737),eye:new THREE.MeshBasicMaterial({color:0xff3928})};
+function init3D(){
+ scene=new THREE.Scene();scene.background=new THREE.Color(0x101a20);scene.fog=new THREE.Fog(0x101a20,18,66);
+ camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.08,120);camera.position.set(0,1.72,5);scene.add(camera);
+ renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.22;renderer.setClearColor(0x101a20,1);renderer.domElement.style.cursor='crosshair';document.body.appendChild(renderer.domElement);
+ scene.add(new THREE.HemisphereLight(0xb5cce0,0x171b15,2.25));
+ const moon=new THREE.DirectionalLight(0xc4dcff,3.0);moon.position.set(-10,18,7);moon.castShadow=true;moon.shadow.mapSize.set(1024,1024);scene.add(moon);
+ const red=new THREE.PointLight(0xff3b22,28,16);red.position.set(5,3,-9);scene.add(red);
+ const floor=new THREE.Mesh(new THREE.PlaneGeometry(100,100),materials.floor);floor.rotation.x=-Math.PI/2;floor.position.y=0;floor.receiveShadow=true;scene.add(floor);
+ // floor markings
+ const grid=new THREE.GridHelper(100,70,0x46554a,0x313c35);grid.position.y=.012;scene.add(grid);
+ buildArena();
+ // Poeira atmosférica iluminada: pequenos pontos suspensos no ar para dar profundidade ao cenário.
+ const dustGeo=new THREE.BufferGeometry(), dustCount=420, dustPositions=new Float32Array(dustCount*3);
+ for(let i=0;i<dustCount;i++){dustPositions[i*3]=rand(-25,25);dustPositions[i*3+1]=rand(.2,6);dustPositions[i*3+2]=rand(-25,25)}
+ dustGeo.setAttribute('position',new THREE.BufferAttribute(dustPositions,3));
+ const dust=new THREE.Points(dustGeo,new THREE.PointsMaterial({color:0xb9c9b0,size:.045,transparent:true,opacity:.42,depthWrite:false}));
+ scene.add(dust);decor.push(dust);
+ buildWeapon();clock=new THREE.Clock();raycaster=new THREE.Raycaster();
+ window.addEventListener('resize',onResize);
+ renderer.domElement.addEventListener('click',()=>{if(started&&!dead&&!paused&&document.pointerLockElement!==renderer.domElement)renderer.domElement.requestPointerLock()});
+ document.addEventListener('pointerlockchange',()=>{if(started&&!dead){paused=document.pointerLockElement!==renderer.domElement;$('hint').textContent=paused?'Clique no jogo para retomar · Esc libera o mouse':'WASD mover · Mouse mirar · Clique atirar · R recarregar · Shift correr · Esc pausar'}});
+ document.addEventListener('mousemove',e=>{if(started&&!paused&&!dead&&document.pointerLockElement===renderer.domElement){player.yaw-=e.movementX*.0022;player.pitch-=e.movementY*.0018;player.pitch=Math.max(-1.1,Math.min(1.1,player.pitch));camera.rotation.order='YXZ';camera.rotation.set(player.pitch,player.yaw,0)}});
+ document.addEventListener('mousedown',e=>{if(e.button===0&&started&&!paused&&!dead&&document.pointerLockElement===renderer.domElement)shoot()});
+}
+function onResize(){if(!renderer)return;camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)}
+function box(w,h,d,material,x,y,z,cast=true){let o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);o.position.set(x,y,z);o.castShadow=cast;o.receiveShadow=true;scene.add(o);return o}
+function buildArena(){
+ // fenced industrial yard, low cover and warehouse walls
+ box(54,1,1,materials.wall,0,.5,-26);box(54,1,1,materials.wall,0,.5,26);box(1,1,52,materials.wall,-27,.5,0);box(1,1,52,materials.wall,27,.5,0);
+ // taller industrial buildings beyond the fence
+ for(let i=0;i<14;i++){let x=-30+i*4.5,z=-32-rand(0,8),h=rand(5,13);let b=box(rand(3,5),h,rand(3,5),i%3===0?materials.metal:materials.dark,x,h/2,z,false);b.material=b.material.clone();if(i%2===0){let win=box(.65,.16,.04,mat(0x7a9eae,.4),x,h*.68,z+2.02,false)}}
+ for(let i=0;i<13;i++){let x=rand(-21,21),z=rand(-21,21);if(Math.hypot(x,z)<6)continue;let w=rand(1.6,3),d=rand(1.6,3),h=rand(1.2,2.5);let o=box(w,h,d,i%3===0?materials.metal:materials.crate,x,h/2,z);obstacles.push({x,z,w,d,mesh:o})}
+ // warning barrels, lights and debris
+ for(let i=0;i<12;i++){let x=rand(-24,24),z=rand(-24,24);if(Math.hypot(x,z)<7)continue;let barrel=new THREE.Mesh(new THREE.CylinderGeometry(.32,.34,1.05,12),mat(i%3?0x6c3429:0x7b842f));barrel.position.set(x,.53,z);barrel.castShadow=true;scene.add(barrel);decor.push(barrel)}
+ // light poles
+ for(let x of [-22,22])for(let z of [-19,0,19]){box(.16,5,.16,materials.metal,x,2.5,z,false);let lamp=new THREE.PointLight(z===0?0xff4c2b:0xffd59a,16,12);lamp.position.set(x,4.7,z);scene.add(lamp);let bulb=new THREE.Mesh(new THREE.BoxGeometry(.45,.12,.35),new THREE.MeshBasicMaterial({color:0xffdca0}));bulb.position.copy(lamp.position);scene.add(bulb)}
+ // painted bunker sign
+ box(8,2,.18,materials.dark,0,3,-25.35,false);
+ const canvas=document.createElement('canvas');canvas.width=512;canvas.height=128;const c=canvas.getContext('2d');c.fillStyle='#15251b';c.fillRect(0,0,512,128);c.strokeStyle='#c8ff3d';c.lineWidth=5;c.strokeRect(5,5,502,118);c.fillStyle='#d7ff57';c.font='bold 62px Arial';c.textAlign='center';c.fillText('BUNKER 7',256,82);const tex=new THREE.CanvasTexture(canvas);const sign=new THREE.Mesh(new THREE.PlaneGeometry(7.8,1.95),new THREE.MeshBasicMaterial({map:tex}));sign.position.set(0,3,-25.23);scene.add(sign);
+}
+function buildWeapon(){
+ weaponGroup=new THREE.Group();camera.add(weaponGroup);weaponGroup.position.set(.33,-.31,-.58);
+ const dark=mat(0x171c1a,.38,.55),steel=mat(0x46514b,.3,.7),grip=mat(0x252a25);
+ let body=new THREE.Mesh(new THREE.BoxGeometry(.18,.16,.53),dark);body.position.set(0,0,-.05);weaponGroup.add(body);
+ let receiver=new THREE.Mesh(new THREE.BoxGeometry(.2,.12,.23),steel);receiver.position.set(0,.035,-.13);weaponGroup.add(receiver);
+ let barrel=new THREE.Mesh(new THREE.CylinderGeometry(.027,.027,.44,10),dark);barrel.rotation.x=Math.PI/2;barrel.position.set(0,.025,-.46);weaponGroup.add(barrel);
+ let sight=new THREE.Mesh(new THREE.BoxGeometry(.07,.07,.1),grip);sight.position.set(0,.12,-.13);weaponGroup.add(sight);
+ let magMesh=new THREE.Mesh(new THREE.BoxGeometry(.1,.22,.13),grip);magMesh.position.set(0,-.15,-.03);magMesh.rotation.x=-.15;weaponGroup.add(magMesh);
+ let handMaterial=mat(skins[chosenSkin].body);let sleeveMaterial=mat(skins[chosenSkin].vest);ellipsoid(weaponGroup,sleeveMaterial,-.105,-.105,-.10,.105,.105,.16,12);ellipsoid(weaponGroup,handMaterial,-.11,-.095,-.235,.075,.055,.09,12);for(let fi=0;fi<4;fi++)ellipsoid(weaponGroup,handMaterial,-.16+fi*.028,-.13,-.28,.014,.022,.055,8);
+ const rail=new THREE.Mesh(new THREE.BoxGeometry(.055,.045,.34),steel);rail.position.set(0,.105,-.22);weaponGroup.add(rail);
+ const muzzle=new THREE.Mesh(new THREE.ConeGeometry(.12,.38,8),new THREE.MeshBasicMaterial({color:0xffc45e,transparent:true,opacity:.9}));muzzle.rotation.x=-Math.PI/2;muzzle.position.set(0,.025,-.72);muzzle.visible=false;weaponGroup.add(muzzle);
+ const flashLight=new THREE.PointLight(0xffa23b,0,4);flashLight.position.set(0,.02,-.72);weaponGroup.add(flashLight);
+ weapon={body,receiver,barrel,magMesh,rail,muzzle,flashLight,handMaterial,sleeveMaterial,baseY:-.31,recoil:0};
+}
+function rand(a,b){return a+Math.random()*(b-a)}
+function startGame(){if(!renderer)init3D();resetGame();$('menu').style.display='none';$('end').style.display='none';$('hud').style.display='block';started=true;paused=false;renderer.domElement.requestPointerLock();clock.getDelta()}
+function resetGame(){for(const z of zombies)scene.remove(z.group);for(const b of bullets)scene.remove(b.mesh);zombies=[];bullets=[];player={x:0,z:5,yaw:0,pitch:0,hp:100};camera.position.set(0,1.72,5);camera.rotation.set(0,0,0);wave=1;kills=score=0;mag=30;reserve=120;reloadTime=fireTime=0;spawnLeft=8;spawnClock=.8;dead=false;paused=false;weaponGroup.position.set(.33,-.31,-.58);updateHUD();announce('ONDA 01')}
+function ellipsoid(parent,material,x,y,z,sx,sy,sz,detail=16){
+ const m=new THREE.Mesh(new THREE.SphereGeometry(1,detail,Math.max(8,Math.floor(detail*.7))),material);
+ m.position.set(x,y,z);m.scale.set(sx,sy,sz);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;
+}
+function limb(parent,material,top,bottom,r1,r2,segments=12){
+ const a=new THREE.Vector3(...top),b=new THREE.Vector3(...bottom),d=new THREE.Vector3().subVectors(b,a);
+ const m=new THREE.Mesh(new THREE.CylinderGeometry(r2,r1,d.length(),segments),material);
+ m.position.copy(a).add(b).multiplyScalar(.5);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;
+}
+function makeZombie(){
+ const a=rand(0,Math.PI*2),r=rand(17,23),x=Math.cos(a)*r,z=Math.sin(a)*r;
+ const group=new THREE.Group(),heavy=Math.random()<Math.min(.12+wave*.025,.38),size=heavy?1.12:rand(.91,1.06);
+ const skinTones=[0x9aa18a,0x7b8a72,0xb2a18c,0x756d62,0x9c8c79,0x697a6c];
+ const shirtTones=[0x353e36,0x4c4237,0x303b46,0x51453b,0x3d4634,0x292e30];
+ const pantsTones=[0x222a27,0x30343a,0x454034,0x292d31];
+ const skin=mat(skinTones[Math.floor(Math.random()*skinTones.length)]), shirt=mat(shirtTones[Math.floor(Math.random()*shirtTones.length)]), pants=mat(pantsTones[Math.floor(Math.random()*pantsTones.length)]), boots=mat(0x191b19,.95), wound=mat(0x572c2b), hair=mat([0x1d201e,0x34302a,0x51463b,0x77736a][Math.floor(Math.random()*4)]), eyeWhite=mat(0xd8d1bb), pupil=new THREE.MeshBasicMaterial({color:0xff3a27});
+ // Proportioned torso, pelvis and neck rather than a single box.
+ ellipsoid(group,shirt,0,.98*size,0,.31*size,.43*size,.19*size,20);
+ ellipsoid(group,shirt,0,1.23*size,0,.37*size,.19*size,.19*size,18); // shoulders
+ ellipsoid(group,pants,0,.55*size,0,.23*size,.19*size,.16*size,16);
+ ellipsoid(group,skin,0,1.39*size,0,.105*size,.13*size,.105*size,14);
+ const head=ellipsoid(group,skin,0,1.62*size,-.005,.19*size,.245*size,.175*size,20);
+ // Jaw, cheekbones, ears and nose add a recognizably human profile.
+ ellipsoid(group,skin,0,1.49*size,-.025,.14*size,.095*size,.14*size,16);
+ for(const side of [-1,1]){
+  ellipsoid(group,skin,side*.195*size,1.62*size,0,.045*size,.07*size,.04*size,10);
+  ellipsoid(group,skin,side*.085*size,1.63*size,-.151*size,.055*size,.035*size,.024*size,12);
+  ellipsoid(group,eyeWhite,side*.078*size,1.64*size,-.171*size,.027*size,.018*size,.012*size,10);
+  ellipsoid(group,pupil,side*.078*size,1.638*size,-.183*size,.011*size,.012*size,.006*size,8);
+  // ragged sleeves / shoulders
+  ellipsoid(group,shirt,side*.31*size,1.23*size,0,.14*size,.17*size,.15*size,14);
+ }
+ ellipsoid(group,skin,0,1.605*size,-.174*size,.032*size,.047*size,.034*size,10); // nose
+ ellipsoid(group,wound,0,1.535*size,-.158*size,.055*size,.018*size,.012*size,10); // torn mouth
+ ellipsoid(group,hair,0,1.81*size,.005,.19*size,.075*size,.17*size,16);
+ // One eye is clouded and several wounds are scattered over the skin.
+ ellipsoid(group,mat(0x4b3932),-.09*size,1.68*size,-.16*size,.04*size,.028*size,.014*size,10);
+ for(let i=0;i<3;i++){const wx=rand(-.2,.2)*size,wy=rand(1.25,1.65)*size;ellipsoid(group,wound,wx,wy,-.19*size,.025*size,.04*size,.008*size,8)}
+ // Arms pivot at the shoulders so the existing chase animation moves the full limb.
+ const arms=[],legs=[];
+ for(const side of [-1,1]){
+  const armPivot=new THREE.Group();armPivot.position.set(side*.32*size,1.24*size,0);group.add(armPivot);
+  ellipsoid(armPivot,shirt,0,-.12*size,0,.105*size,.17*size,.115*size,12);
+  limb(armPivot,skin,[0,-.18*size,0],[side*.035*size,-.43*size,-.015*size],.082*size,.062*size,12);
+  ellipsoid(armPivot,skin,side*.035*size,-.46*size,-.02*size,.065*size,.075*size,.055*size,12);
+  for(let f=0;f<4;f++)ellipsoid(armPivot,skin,side*(.012+f*.026)*size,-.515*size,-.05*size,.012*size,.045*size,.014*size,8);
+  arms.push(armPivot);
+  const legPivot=new THREE.Group();legPivot.position.set(side*.13*size,.52*size,0);group.add(legPivot);
+  ellipsoid(legPivot,pants,0,-.13*size,0,.12*size,.22*size,.13*size,12);
+  limb(legPivot,pants,[0,-.18*size,0],[side*.012*size,-.43*size,-.015*size],.095*size,.065*size,12);
+  ellipsoid(legPivot,boots,side*.012*size,-.48*size,-.065*size,.09*size,.065*size,.15*size,12);
+  legs.push(legPivot);
+ }
+ // Cloth tears, a utility strap, belt and a few dark stains break up the silhouette.
+ const strap=limb(group,mat(0x242723),[-.22*size,1.24*size,-.12*size],[.22*size,.79*size,-.16*size],.025*size,.025*size,8);
+ ellipsoid(group,mat(0x1f2421),.16*size,.79*size,-.17*size,.07*size,.07*size,.035*size,10);
+ for(let i=0;i<3;i++){const tear=ellipsoid(group,wound,rand(-.22,.22)*size,rand(.78,1.2)*size,-.185*size,.025*size,.05*size,.009*size,8);tear.rotation.z=rand(-.8,.8)}
+ group.scale.setScalar(size);group.position.set(x,0,z);scene.add(group);
+ const hp=heavy?3+Math.floor(wave/4):1+Math.floor(wave/8);
+ zombies.push({group,hp,maxHp:hp,speed:(heavy?1.15:1.65)+wave*.075,heavy,attack:0,phase:rand(0,7),hit:0,arms,legs,body:group,head});
+}
+function shoot(){if(fireTime>0||reloadTime>0)return;if(mag<=0){reload();return}mag--;fireTime=.12;weapon.recoil=.12;weapon.muzzle.visible=true;weapon.flashLight.intensity=5;weaponGroup.position.z=-.72;weaponGroup.position.y=-.27;
+ const dir=new THREE.Vector3();camera.getWorldDirection(dir);const origin=camera.position.clone();raycaster.set(origin,dir);raycaster.far=55;
+ const meshes=[];zombies.forEach(z=>z.group.traverse(o=>{if(o.isMesh)meshes.push(o)}));const hits=raycaster.intersectObjects(meshes,false);
+ if(hits.length){const mesh=hits[0].object;const z=zombies.find(z=>{let found=false;z.group.traverse(o=>{if(o===mesh)found=true});return found});if(z){z.hp--;z.hit=.15;const impact=new THREE.Mesh(new THREE.SphereGeometry(.07,6,6),mat(0xa3c66a));impact.position.copy(hits[0].point);scene.add(impact);setTimeout(()=>scene.remove(impact),180);if(z.hp<=0){scene.remove(z.group);zombies.splice(zombies.indexOf(z),1);kills++;score+=z.heavy?150:100;if(kills%8===0)reserve=Math.min(240,reserve+15)}}}
+ updateHUD()}
+function reload(){if(reloadTime||mag===30||reserve<=0)return;reloadTime=1.45;weapon.magMesh.rotation.x=-.65;announce('RECARREGANDO')}
+function announce(s){const el=$('toast');el.textContent=s;el.style.opacity=1;clearTimeout(announce.t);announce.t=setTimeout(()=>el.style.opacity=0,1300)}
+function updateHUD(){$('wave').textContent=String(wave).padStart(2,'0');$('left').textContent=zombies.length+spawnLeft;$('score').textContent=String(score).padStart(5,'0');$('kills').textContent=kills;$('hptext').textContent=Math.max(0,Math.ceil(player?.hp??100))+'%';$('hpbar').style.width=Math.max(0,player?.hp??100)+'%';$('hpbar').style.background=(player?.hp??100)<30?'#ff4057':'#bfff43';$('mag').textContent=mag;$('reserve').textContent=reserve}
+function collides(x,z){if(Math.abs(x)>25.3||Math.abs(z)>25.3)return true;return obstacles.some(o=>Math.abs(x-o.x)<o.w/2+.35&&Math.abs(z-o.z)<o.d/2+.35)}
+function update(dt){if(!started||paused||dead)return;dt=Math.min(dt,.04);fireTime=Math.max(0,fireTime-dt);if(reloadTime>0){reloadTime-=dt;if(reloadTime<=0){let n=Math.min(30-mag,reserve);mag+=n;reserve-=n;weapon.magMesh.rotation.x=-.15;updateHUD()}}
+ let f=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0),s=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);let sprint=!!(keys.ShiftLeft||keys.ShiftRight);let speed=moveSpeed*(sprint?1.55:1);let len=Math.hypot(f,s)||1;let dx=(Math.sin(player.yaw)*f+Math.cos(player.yaw)*s)*speed*dt/len;let dz=(-Math.cos(player.yaw)*f+Math.sin(player.yaw)*s)*speed*dt/len;if(!collides(player.x+dx,player.z))player.x+=dx;if(!collides(player.x,player.z+dz))player.z+=dz;const moving=(Math.abs(f)+Math.abs(s))>0;const bob=moving?Math.sin(performance.now()*(sprint?.017:.012))*(sprint?.055:.025):Math.sin(performance.now()*.0015)*.006;camera.position.set(player.x,1.72+bob,player.z);const targetFov=sprint&&moving?81:75;camera.fov+=(targetFov-camera.fov)*Math.min(1,dt*5);camera.updateProjectionMatrix();
+ spawnClock-=dt;if(spawnLeft>0&&spawnClock<=0){makeZombie();spawnLeft--;spawnClock=Math.max(.28,.9-wave*.035)*rand(.65,1.15)}if(spawnLeft===0&&zombies.length===0){wave++;spawnLeft=7+wave*3;spawnClock=1.3;reserve=Math.min(240,reserve+30);player.hp=Math.min(100,player.hp+12);announce('ONDA '+String(wave).padStart(2,'0')+' — REFORÇOS')}
+ for(const z of zombies){z.phase+=dt*6;z.arms.forEach((a,i)=>{a.rotation.x=Math.sin(z.phase+i*Math.PI)*.48;a.rotation.z=(i===0?-.25:.25)+Math.sin(z.phase*.7+i)*.12});z.legs.forEach((l,i)=>{l.rotation.x=Math.sin(z.phase+i*Math.PI)*.38});let dx=player.x-z.group.position.x,dz=player.z-z.group.position.z,d=Math.hypot(dx,dz)||1;if(d>0.95){let nx=z.group.position.x+dx/d*z.speed*dt,nz=z.group.position.z+dz/d*z.speed*dt;if(!collides(nx,z.group.position.z))z.group.position.x=nx;if(!collides(z.group.position.x,nz))z.group.position.z=nz;z.group.rotation.y=Math.atan2(dx,dz);z.group.position.y=Math.abs(Math.sin(z.phase))*.035}else{z.attack-=dt;if(z.attack<=0){player.hp-=z.heavy?14:9;z.attack=.72;damageFlash=.22;updateHUD()}}}
+ if(player.hp<=0){player.hp=0;dead=true;started=false;document.exitPointerLock?.();$('endText').textContent=`Você chegou à onda ${wave}, eliminou ${kills} infectados e marcou ${score} pontos.`;$('end').style.display='flex';$('hud').style.display='none'}
+ damageFlash=Math.max(0,damageFlash-dt);if(weaponGroup){weapon.recoil=Math.max(0,weapon.recoil-dt);weaponGroup.position.z=-.58-weapon.recoil*.65;weaponGroup.position.y=weapon.baseY+Math.sin(performance.now()*.006)*.008-(Math.abs(f)+Math.abs(s)>0?Math.abs(Math.sin(performance.now()*.012))*.018:0);weaponGroup.position.x=.33+Math.sin(performance.now()*.004)*.004;weapon.muzzle.visible=weapon.recoil>.075;weapon.flashLight.intensity=weapon.muzzle.visible?4:0;if(reloadTime>0){weapon.magMesh.rotation.x=-.15-Math.sin((1.45-reloadTime)/1.45*Math.PI)*.65}}
+}
+function render(){if(!renderer)return;renderer.render(scene,camera);if(damageFlash>0){$('hud').style.boxShadow=`inset 0 0 90px rgba(255,0,0,${damageFlash*1.5})`}else $('hud').style.boxShadow='none'}
+function loop(){requestAnimationFrame(loop);if(!renderer)return;let dt=clock?clock.getDelta():.016;update(dt);render()}
+document.addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();if(e.code==='KeyR'&&started&&!paused)reload();if(e.code==='Escape'&&started&&!dead){paused=document.pointerLockElement!==renderer?.domElement;if(!paused)document.exitPointerLock?.();}});
+document.addEventListener('keyup',e=>keys[e.code]=false);
+document.querySelectorAll('.skin').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.skin').forEach(x=>x.classList.remove('active'));b.classList.add('active');chosenSkin=+b.dataset.skin;let sk=skins[chosenSkin];materials.cloth.color.setHex(sk.vest);materials.zskin.color.setHex(sk.body);if(weaponGroup&&weapon){weapon.handMaterial?.color?.setHex(sk.body);weapon.sleeveMaterial?.color?.setHex(sk.vest)}}));
+document.querySelectorAll('.weapon-skin').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.weapon-skin').forEach(x=>x.classList.remove('active'));b.classList.add('active');chosenWeapon=+b.dataset.weapon;const f=weaponFinishes[chosenWeapon];if(weapon){weapon.body.material.color.setHex(f.body);weapon.receiver.material.color.setHex(f.metal);weapon.barrel.material.color.setHex(f.body);weapon.magMesh.material.color.setHex(f.accent);weapon.rail.material.color.setHex(f.metal)}}));
+$('start').onclick=startGame;$('again').onclick=startGame;$('back').onclick=()=>{document.exitPointerLock?.();$('end').style.display='none';$('menu').style.display='flex';$('hud').style.display='none';started=false};
+try{init3D();loop()}catch(e){console.error(e);$('menu').querySelector('.note').textContent='Não foi possível iniciar o 3D. Confira sua conexão e abra o arquivo no Chrome ou Edge.'}
+})();
+</script>
+</body></html>
