@@ -34,7 +34,7 @@ button{font:inherit;font-weight:900;letter-spacing:1px;cursor:pointer;text-trans
  <div class="row"><div class="grow"><div class="kicker">ESCOLHA SUA SKIN</div><div class="skins">
  <button class="skin active" data-skin="0"><div class="swatch"></div>GHOST / CAMO</button><button class="skin" data-skin="1"><div class="swatch"></div>FROST / BLUE</button><button class="skin" data-skin="2"><div class="swatch"></div>EMBER / DESERT</button><button class="skin" data-skin="3"><div class="swatch"></div>RAVEN / STEEL</button><button class="skin" data-skin="4"><div class="swatch"></div>VOID / NEON</button><button class="skin" data-skin="5"><div class="swatch"></div>INFERNO / BLOOD</button>
  </div><div class="section-label">ACABAMENTO DO RIFLE</div><div class="weapon-skins"><button class="weapon-skin active" data-weapon="0">MATTE TACTICAL</button><button class="weapon-skin" data-weapon="1">TOXIC NEON</button><button class="weapon-skin" data-weapon="2">BLOOD RUST</button><button class="weapon-skin" data-weapon="3">FROST STEEL</button></div></div><div class="grow"><div class="kicker">CONTROLES</div><div class="controls"><b>W A S D</b> — movimentar · <b>MOUSE</b> — mirar<br><b>CLIQUE ESQUERDO</b> — atirar · <b>R</b> — recarregar<br><b>SHIFT</b> — correr · <b>ESC</b> — soltar/retomar mouse</div></div></div>
- <button class="primary" id="start">INICIAR OPERAÇÃO →</button><div class="note">O jogo usa Three.js via CDN; é necessário estar conectado à internet para carregar os gráficos 3D. Personagens, armas e cenário são originais e estilizados.</div>
+ <button class="primary" id="start">INICIAR OPERAÇÃO →</button><div class="note">O jogo usa Three.js via CDN; é necessário estar conectado à internet para carregar os gráficos 3D. Esta versão de teste adiciona materiais de tecido com microtextura e equipamento tático procedural; modelos humanos externos ainda não foram incorporados.</div>
  </div></div>
 <div class="overlay" id="end" style="display:none"><div class="card" style="max-width:520px;text-align:center"><div class="kicker">SINAL PERDIDO</div><h1>OPERADOR<br><em>NEUTRALIZADO</em></h1><p id="endText"></p><button class="primary" id="again">TENTAR NOVAMENTE ↻</button><button class="secondary" id="back">VOLTAR AO MENU</button></div></div>
 <script src="./node_modules/three/build/three.min.js"></script>
@@ -112,13 +112,38 @@ function limb(parent,material,top,bottom,r1,r2,segments=12){
  const m=new THREE.Mesh(new THREE.CylinderGeometry(r2,r1,d.length(),segments),material);
  m.position.copy(a).add(b).multiplyScalar(.5);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;
 }
+function makeFabricMaterial(baseColor,seed=1){
+ const c=document.createElement('canvas');c.width=128;c.height=128;const g=c.getContext('2d');
+ const base='#'+baseColor.toString(16).padStart(6,'0');g.fillStyle=base;g.fillRect(0,0,128,128);
+ let n=seed*7919;const rnd=()=>{n=(n*1664525+1013904223)>>>0;return n/4294967296};
+ for(let i=0;i<2100;i++){const v=rnd()>.5?255:0;g.fillStyle=v?'rgba(255,255,255,.055)':'rgba(0,0,0,.075)';g.fillRect(rnd()*128,rnd()*128,1+rnd()*2,1);}
+ for(let y=0;y<128;y+=8){g.fillStyle='rgba(0,0,0,.055)';g.fillRect(0,y,128,1);}
+ const tex=new THREE.CanvasTexture(c);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.repeat.set(2,2);tex.colorSpace=THREE.SRGBColorSpace;
+ return new THREE.MeshStandardMaterial({color:0xffffff,map:tex,roughness:.96,metalness:0});
+}
+function addTacticalDetails(group,size,shirt,pants){
+ // Layered plate carrier, stitched webbing, pouches, belt and knee pads give clothing a less toy-like silhouette.
+ const vest=mat(0x252a25,.96),web=mat(0x111613,.98),buckle=mat(0x687064,.55,.35),rubber=mat(0x171a18,.98);
+ ellipsoid(group,vest,0,1.02*size,-.155*size,.255*size,.31*size,.075*size,16);
+ for(let i=-1;i<=1;i++){const pouch=box(.105*size,.13*size,.065*size,web,i*.13*size,.91*size,-.225*size,false);pouch.rotation.z=i*.025;}
+ for(let y of [.82,1.02,1.2]){const strap=box(.48*size,.025*size,.025*size,web,0,y*size,-.205*size,false);}
+ box(.42*size,.045*size,.04*size,web,0,.72*size,-.14*size,false);
+ box(.075*size,.06*size,.025*size,buckle,.04*size,.72*size,-.17*size,false);
+ for(const side of [-1,1]){
+  ellipsoid(group,rubber,side*.13*size,.32*size,-.015*size,.105*size,.09*size,.12*size,12);
+  // shoulder straps and small equipment radio
+  box(.07*size,.33*size,.035*size,web,side*.18*size,1.13*size,-.19*size,false);
+ }
+ const radio=box(.075*size,.16*size,.055*size,mat(0x303b35,.8),-.23*size,1.12*size,-.12*size,false);
+ const antenna=limb(group,web,[-.24*size,1.2*size,-.12*size],[-.25*size,1.34*size,-.12*size],.006*size,.006*size,6);
+}
 function makeZombie(){
  const a=rand(0,Math.PI*2),r=rand(17,23),x=Math.cos(a)*r,z=Math.sin(a)*r;
  const group=new THREE.Group(),heavy=Math.random()<Math.min(.12+wave*.025,.38),size=heavy?1.12:rand(.91,1.06);
  const skinTones=[0x9aa18a,0x7b8a72,0xb2a18c,0x756d62,0x9c8c79,0x697a6c];
  const shirtTones=[0x353e36,0x4c4237,0x303b46,0x51453b,0x3d4634,0x292e30];
  const pantsTones=[0x222a27,0x30343a,0x454034,0x292d31];
- const skin=mat(skinTones[Math.floor(Math.random()*skinTones.length)]), shirt=mat(shirtTones[Math.floor(Math.random()*shirtTones.length)]), pants=mat(pantsTones[Math.floor(Math.random()*pantsTones.length)]), boots=mat(0x191b19,.95), wound=mat(0x572c2b), hair=mat([0x1d201e,0x34302a,0x51463b,0x77736a][Math.floor(Math.random()*4)]), eyeWhite=mat(0xd8d1bb), pupil=new THREE.MeshBasicMaterial({color:0xff3a27});
+ const skin=mat(skinTones[Math.floor(Math.random()*skinTones.length)],.98), shirtColor=shirtTones[Math.floor(Math.random()*shirtTones.length)], pantsColor=pantsTones[Math.floor(Math.random()*pantsTones.length)], shirt=makeFabricMaterial(shirtColor,Math.floor(rand(1,9))), pants=makeFabricMaterial(pantsColor,Math.floor(rand(10,18))), boots=mat(0x191b19,.98), wound=mat(0x572c2b,.98), hair=mat([0x1d201e,0x34302a,0x51463b,0x77736a][Math.floor(Math.random()*4)]), eyeWhite=mat(0xd8d1bb), pupil=new THREE.MeshBasicMaterial({color:0xff3a27});
  // Proportioned torso, pelvis and neck rather than a single box.
  ellipsoid(group,shirt,0,.98*size,0,.31*size,.43*size,.19*size,20);
  ellipsoid(group,shirt,0,1.23*size,0,.37*size,.19*size,.19*size,18); // shoulders
@@ -156,6 +181,8 @@ function makeZombie(){
   ellipsoid(legPivot,boots,side*.012*size,-.48*size,-.065*size,.09*size,.065*size,.15*size,12);
   legs.push(legPivot);
  }
+ // Layered tactical equipment makes each infected silhouette less like a smooth toy.
+ addTacticalDetails(group,size,shirt,pants);
  // Cloth tears, a utility strap, belt and a few dark stains break up the silhouette.
  const strap=limb(group,mat(0x242723),[-.22*size,1.24*size,-.12*size],[.22*size,.79*size,-.16*size],.025*size,.025*size,8);
  ellipsoid(group,mat(0x1f2421),.16*size,.79*size,-.17*size,.07*size,.07*size,.035*size,10);
