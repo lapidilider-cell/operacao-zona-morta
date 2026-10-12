@@ -51,7 +51,6 @@ async function configureAutoUpdates() {
     if (updaterStarted) return;
     updaterStarted = true;
     autoUpdater.autoDownload = true;
-    autoUpdater.autoInstallOnAppQuit = true;
     autoUpdater.autoInstallOnAppQuit = false;
     autoUpdater.allowPrerelease = false;
 
