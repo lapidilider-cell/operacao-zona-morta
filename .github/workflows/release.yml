@@ -31,7 +31,14 @@ jobs:
         run: node -e "const p=require('./package.json'); if(!p.version || !p.build || !p.build.publish) process.exit(1); console.log('Package',p.name,p.version)"
 
       - name: Create version tag for GitHub release
-        run: node -e "const {execFileSync}=require('node:child_process'); const tag='v'+require('./package.json').version; execFileSync('git',['tag',tag]); execFileSync('git',['push','origin',tag]);"
+        shell: pwsh
+        run: |
+          $tag = "v$(node -p "require('./package.json').version")"
+          git fetch --tags origin
+          if (-not (git tag --list $tag)) {
+            git tag $tag
+          }
+          git push origin $tag
 
       - name: Build and publish Windows installer
         run: npm run release
