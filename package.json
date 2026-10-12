@@ -1,7 +1,7 @@
 {
   "name": "operacao-zona-morta-inferno",
-  "version": "2.1.2",
-  "description": "Operação Zona Morta — Edição Inferno FPS 3D",
+  "version": "2.2.0",
+  "description": "Operação Zona Morta — FPS de sobrevivência independente",
   "main": "main.js",
   "author": "LAPIDI",
   "license": "UNLICENSED",
@@ -15,7 +15,6 @@
     "release": "electron-builder --win nsis --x64 --publish always"
   },
   "dependencies": {
-    "three": "0.160.0",
     "electron-updater": "^6.6.2"
   },
   "devDependencies": {
@@ -30,7 +29,6 @@
       "main.js",
       "game.html",
       "package.json",
-      "node_modules/three/**/*",
       "assets/**/*",
       "node_modules/electron-updater/**/*"
     ],
@@ -39,12 +37,7 @@
     },
     "win": {
       "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        }
+        { "target": "nsis", "arch": ["x64"] }
       ],
       "artifactName": "Operacao-Zona-Morta-Setup-${version}.${ext}"
     },
