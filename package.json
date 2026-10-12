@@ -31,6 +31,7 @@
       "game.html",
       "package.json",
       "node_modules/three/**/*",
+      "assets/**/*",
       "node_modules/electron-updater/**/*"
     ],
     "directories": {
