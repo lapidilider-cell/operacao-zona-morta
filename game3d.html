@@ -13,7 +13,7 @@ window.__gameModuleReady = false;
 window.__gameLastError = '';
 function showGameError(title, detail) {
   const n = document.getElementById('note');
-  const full = title + '\\n' + (detail || 'Nenhum detalhe adicional fornecido pelo navegador.');
+  const full = title + String.fromCharCode(10) + (detail || 'Nenhum detalhe adicional fornecido pelo navegador.');
   window.__gameLastError = full;
   if (n) {
     n.style.whiteSpace = 'pre-wrap';
@@ -31,7 +31,7 @@ window.addEventListener('error', function (e) {
     e.lineno ? 'Linha: ' + e.lineno : '',
     e.colno ? 'Coluna: ' + e.colno : '',
     e.error && e.error.stack ? 'Pilha: ' + e.error.stack : ''
-  ].filter(Boolean).join('\\n');
+  ].filter(Boolean).join(String.fromCharCode(10));
   showGameError('FALHA AO CARREGAR O JOGO', details);
 });
 window.addEventListener('unhandledrejection', function (e) {
@@ -47,8 +47,8 @@ document.addEventListener('DOMContentLoaded', function () {
   if (b) b.addEventListener('click', function () {
     if (!window.__gameModuleReady && !window.__gameLastError) {
       showGameError('O MÓDULO DO MOTOR 3D NÃO INICIOU',
-        'O navegador não forneceu uma mensagem de erro antes do clique.\\n' +
-        'Verifique se os arquivos node_modules/three e os módulos GLTFLoader/SkeletonUtils estão presentes na instalação.\\n' +
+        'O navegador não forneceu uma mensagem de erro antes do clique.' + String.fromCharCode(10) +
+        'Verifique se os arquivos node_modules/three e os módulos GLTFLoader/SkeletonUtils estão presentes na instalação.' + String.fromCharCode(10) +
         'Abra o DevTools (Ctrl+Shift+I) e consulte Console para ver o erro original.');
     }
   });
@@ -76,6 +76,6 @@ function reloadGun(){if(reserve>0&&mag<30&&reload<=0)reload=1.35}
 function updateHud(){$('wave').textContent=String(wave).padStart(2,'0');$('left').textContent=zombies.length+spawnLeft;$('score').textContent=String(score).padStart(5,'0');$('hptext').textContent=Math.max(0,Math.ceil(player?.hp||0))+'%';$('hpbar').style.width=Math.max(0,player?.hp||0)+'%';$('mag').textContent=mag;$('reserve').textContent=reserve}
 function update(dt){if(!started||paused||dead)return;dt=Math.min(dt,.04);fireCd=Math.max(0,fireCd-dt);if(reload>0&&(reload-=dt)<=0){let n=Math.min(30-mag,reserve);mag+=n;reserve-=n}let f=(keys.KeyW?1:0)-(keys.KeyS?1:0),s=(keys.KeyD?1:0)-(keys.KeyA?1:0),len=Math.hypot(f,s)||1,speed=keys.ShiftLeft?7:4.3;let dx=(Math.sin(player.yaw)*f+Math.cos(player.yaw)*s)*speed*dt/len,dz=(-Math.cos(player.yaw)*f+Math.sin(player.yaw)*s)*speed*dt/len;if(!collides(player.x+dx,player.z))player.x+=dx;if(!collides(player.x,player.z+dz))player.z+=dz;camera.position.set(player.x,1.7+(f||s?Math.sin(performance.now()*.012)*.025:0),player.z);camera.rotation.order='YXZ';camera.rotation.y=player.yaw;spawnClock-=dt;if(spawnLeft>0&&spawnClock<=0){makeZombie();spawnLeft--;spawnClock=Math.max(.3,.9-wave*.025)}if(!spawnLeft&&!zombies.length){wave++;spawnLeft=6+wave*3;spawnClock=1;reserve=Math.min(240,reserve+25);player.hp=Math.min(100,player.hp+10)}for(let z of zombies){z.phase+=dt*6;if(z.mixer)z.mixer.update(dt);z.arms.forEach((a,i)=>a.rotation.x=Math.sin(z.phase+i*Math.PI)*.45);z.legs.forEach((l,i)=>l.rotation.x=Math.sin(z.phase+i*Math.PI)*.35);let dx=player.x-z.group.position.x,dz=player.z-z.group.position.z,d=Math.hypot(dx,dz)||1;if(d>.9){let nx=z.group.position.x+dx/d*z.speed*dt,nz=z.group.position.z+dz/d*z.speed*dt;if(!collides(nx,z.group.position.z))z.group.position.x=nx;if(!collides(z.group.position.x,nz))z.group.position.z=nz;z.group.rotation.y=Math.atan2(dx,dz)}else{z.attack-=dt;if(z.attack<=0){player.hp-=10;z.attack=.8;updateHud()}}}if(player.hp<=0){dead=true;started=false;document.exitPointerLock?.();$('result').textContent='Você sobreviveu até a onda '+wave+', eliminou '+kills+' infectados e fez '+score+' pontos.';$('end').classList.remove('hide');$('hud').style.display='none'}updateHud()}
 function loop(){requestAnimationFrame(loop);if(renderer){let dt=clock?.getDelta()||.016;update(dt);renderer.render(scene,camera);if(weapon)weapon.position.z=-.6+(fireCd>0?Math.sin(fireCd*20)*.04:0)}}
-window.__gameModuleReady = true;$('start').onclick=start;$('again').onclick=start;document.addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='KeyR')reloadGun();if(e.code==='Escape'&&started){paused=document.pointerLockElement!==renderer?.domElement}});document.addEventListener('keyup',e=>keys[e.code]=false);document.addEventListener('mousemove',e=>{if(started&&!paused&&document.pointerLockElement===renderer?.domElement){player.yaw+=e.movementX*.002;camera.rotation.x=Math.max(-1.4,Math.min(1.4,camera.rotation.x-e.movementY*.002))}});document.addEventListener('mousedown',()=>{if(started&&document.pointerLockElement===renderer?.domElement)shoot()});document.addEventListener('pointerlockchange',()=>{if(started)paused=document.pointerLockElement!==renderer?.domElement});addEventListener('resize',()=>{if(camera&&renderer){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)}});try{init();loop()}catch(e){console.error('[Inicialização 3D]',e);if(window.showGameError)window.showGameError('FALHA AO INICIAR O MOTOR 3D',[e.name+': '+e.message,e.stack||'Pilha indisponível'].join('\\n'));else $('note').textContent='Falha ao iniciar o motor 3D: '+e.message}
+window.__gameModuleReady = true;$('start').onclick=start;$('again').onclick=start;document.addEventListener('keydown',e=>{keys[e.code]=true;if(e.code==='KeyR')reloadGun();if(e.code==='Escape'&&started){paused=document.pointerLockElement!==renderer?.domElement}});document.addEventListener('keyup',e=>keys[e.code]=false);document.addEventListener('mousemove',e=>{if(started&&!paused&&document.pointerLockElement===renderer?.domElement){player.yaw+=e.movementX*.002;camera.rotation.x=Math.max(-1.4,Math.min(1.4,camera.rotation.x-e.movementY*.002))}});document.addEventListener('mousedown',()=>{if(started&&document.pointerLockElement===renderer?.domElement)shoot()});document.addEventListener('pointerlockchange',()=>{if(started)paused=document.pointerLockElement!==renderer?.domElement});addEventListener('resize',()=>{if(camera&&renderer){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)}});try{init();loop()}catch(e){console.error('[Inicialização 3D]',e);if(window.showGameError)window.showGameError('FALHA AO INICIAR O MOTOR 3D',[e.name+': '+e.message,e.stack||'Pilha indisponível'].join(String.fromCharCode(10)));else $('note').textContent='Falha ao iniciar o motor 3D: '+e.message}
 })();
 </script></body></html>
