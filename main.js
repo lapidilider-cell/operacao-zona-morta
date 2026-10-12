@@ -38,7 +38,7 @@ function openGame() {
   mainWindow.setMinimumSize(960, 640);
   mainWindow.setSize(1440, 900);
   mainWindow.setTitle('Operação: Zona Morta — Edição Inferno');
-  mainWindow.loadFile(path.join(__dirname, 'game.html'));
+  mainWindow.loadFile(path.join(__dirname, 'game3d.html'));
 }
 
 async function configureAutoUpdates() {
