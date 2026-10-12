@@ -1,6 +1,6 @@
 {
   "name": "operacao-zona-morta-inferno",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "Operação Zona Morta — Edição Inferno FPS 3D",
   "main": "main.js",
   "author": "LAPIDI",
@@ -41,7 +41,9 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "artifactName": "Operacao-Zona-Morta-Setup-${version}.${ext}"
