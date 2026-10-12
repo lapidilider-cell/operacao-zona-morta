@@ -28,6 +28,7 @@
     "asar": false,
     "files": [
       "main.js",
+      "preload.js",
       "package.json",
       "assets/**/*",
       "node_modules/electron-updater/**/*",
