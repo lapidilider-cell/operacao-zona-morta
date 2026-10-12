@@ -1,6 +1,6 @@
 {
   "name": "operacao-zona-morta-inferno",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Operação Zona Morta — Edição Inferno FPS 3D",
   "main": "main.js",
   "author": "LAPIDI",
@@ -25,10 +25,7 @@
   "build": {
     "appId": "com.lapidi.operacaozonamorta.inferno",
     "productName": "Operacao Zona Morta Inferno",
-    "asar": true,
-    "asarUnpack": [
-      "node_modules/three/**/*"
-    ],
+    "asar": false,
     "files": [
       "main.js",
       "game.html",
