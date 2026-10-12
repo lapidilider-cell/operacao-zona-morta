@@ -40,6 +40,36 @@ button{font:inherit;font-weight:900;letter-spacing:1px;cursor:pointer;text-trans
 <script type="importmap">
 {"imports":{"three":"./node_modules/three/build/three.module.js"}}
 </script>
+<script>
+/* Diagnóstico independente do motor: também funciona quando o módulo 3D falha ao carregar. */
+(function(){
+  let reported=false;
+  function report(message){
+    if(reported)return;
+    reported=true;
+    const show=()=>{
+      let box=document.getElementById('boot-diagnostic');
+      if(!box){
+        box=document.createElement('div');box.id='boot-diagnostic';
+        box.style.cssText='position:fixed;z-index:99999;left:16px;right:16px;bottom:16px;padding:14px;background:#2a0b10;border:1px solid #ff6678;color:#fff;font:13px/1.5 Arial,sans-serif;white-space:pre-wrap;overflow-wrap:anywhere;max-height:35vh;overflow:auto';
+        document.body.appendChild(box);
+      }
+      box.textContent='ERRO AO CARREGAR O JOGO\n'+message+'\n\nO menu abriu, mas o motor do jogo não iniciou. Tire uma captura desta mensagem para identificar a causa.';
+    };
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',show,{once:true});else show();
+  }
+  window.addEventListener('error',function(e){
+    if(!window.__gameModuleReady)report((e.message||'Erro JavaScript sem descrição')+(e.filename?'\nArquivo: '+e.filename:'')+(e.lineno?'\nLinha: '+e.lineno:''));
+  });
+  window.addEventListener('unhandledrejection',function(e){
+    if(!window.__gameModuleReady)report('Falha assíncrona: '+String(e.reason&&e.reason.message||e.reason||'erro desconhecido'));
+  });
+  setTimeout(function(){
+    if(!window.__gameModuleReady)report('O código principal do jogo não terminou de carregar. Verifique se os arquivos locais do Three.js estão presentes na instalação.');
+  },5000);
+  window.__reportGameBootError=report;
+})();
+</script>
 <script type="module">
 import * as THREE from './node_modules/three/build/three.module.js';
 import { GLTFLoader } from './node_modules/three/examples/jsm/loaders/GLTFLoader.js';
@@ -287,7 +317,9 @@ document.addEventListener('keyup',e=>keys[e.code]=false);
 document.querySelectorAll('.skin').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.skin').forEach(x=>x.classList.remove('active'));b.classList.add('active');chosenSkin=+b.dataset.skin;let sk=skins[chosenSkin];materials.cloth.color.setHex(sk.vest);materials.zskin.color.setHex(sk.body);if(weaponGroup&&weapon){weapon.handMaterial?.color?.setHex(sk.body);weapon.sleeveMaterial?.color?.setHex(sk.vest)}}));
 document.querySelectorAll('.weapon-skin').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.weapon-skin').forEach(x=>x.classList.remove('active'));b.classList.add('active');chosenWeapon=+b.dataset.weapon;const f=weaponFinishes[chosenWeapon];if(weapon){weapon.body.material.color.setHex(f.body);weapon.receiver.material.color.setHex(f.metal);weapon.barrel.material.color.setHex(f.body);weapon.magMesh.material.color.setHex(f.accent);weapon.rail.material.color.setHex(f.metal)}}));
 $('start').onclick=startGame;$('again').onclick=startGame;$('back').onclick=()=>{document.exitPointerLock?.();$('end').style.display='none';$('menu').style.display='flex';$('hud').style.display='none';started=false};
-// A inicialização 3D acontece somente ao clicar em INICIAR OPERAÇÃO, para que qualquer erro apareça no próprio menu e possa ser corrigido/repetido.
+// O módulo foi executado e os eventos do menu foram registrados.
+window.__gameModuleReady=true;
+// A inicialização 3D acontece somente ao clicar em INICIAR OPERAÇÃO.
 })();
 </script>
 </body></html>
