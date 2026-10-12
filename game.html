@@ -42,7 +42,8 @@ import * as THREE from './node_modules/three/build/three.module.js';
 import { GLTFLoader } from './node_modules/three/examples/jsm/loaders/GLTFLoader.js';
 import { clone as cloneSkinnedModel } from './node_modules/three/examples/jsm/utils/SkeletonUtils.js';
 (()=>{'use strict';
-let humanTemplate=null;
+let humanTemplate=null,resolveHumanLoad;
+const humanLoadPromise=new Promise(resolve=>{resolveHumanLoad=resolve});
 const humanLoader=new GLTFLoader();
 humanLoader.load('./assets/human-base-rigged.glb',gltf=>{
  humanTemplate=gltf.scene;
@@ -50,7 +51,8 @@ humanLoader.load('./assets/human-base-rigged.glb',gltf=>{
   if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(o.material){o.material=o.material.clone();o.material.color.set(0x899087);o.material.roughness=.88;}}
  });
  console.info('Modelo humano 3D carregado.');
-},undefined,error=>console.warn('Modelo humano não encontrado; usando infectados procedurais.',error));
+ resolveHumanLoad(true);
+},undefined,error=>{console.error('Falha ao carregar modelo humano 3D; usando infectados procedurais.',error);resolveHumanLoad(false)});
 const $=id=>document.getElementById(id);let scene,camera,renderer,clock,player,weapon,weaponGroup,raycaster;
 let started=false,dead=false,paused=false,chosenSkin=0,keys={},zombies=[],bullets=[],obstacles=[],decor=[],wave=1,kills=0,score=0,spawnLeft=0,spawnClock=0,mag=30,reserve=120,reloadTime=0,fireTime=0,damageFlash=0,hitCooldown=0,moveSpeed=5.5;
 const skins=[{body:0x53684b,vest:0x29372b,accent:0xc8ff3d},{body:0x477ba0,vest:0x1d3448,accent:0x76d8ff},{body:0x9a6541,vest:0x4b3023,accent:0xffc46a},{body:0x87918f,vest:0x252d30,accent:0xd5e6e2},{body:0x6f3c78,vest:0x211b2b,accent:0xff7cf3},{body:0x762c2f,vest:0x19191b,accent:0xff3b47}];
@@ -112,7 +114,7 @@ function buildWeapon(){
  weapon={body,receiver,barrel,magMesh,rail,muzzle,flashLight,handMaterial,sleeveMaterial,baseY:-.31,recoil:0};
 }
 function rand(a,b){return a+Math.random()*(b-a)}
-function startGame(){if(!renderer)init3D();resetGame();$('menu').style.display='none';$('end').style.display='none';$('hud').style.display='block';started=true;paused=false;renderer.domElement.requestPointerLock();clock.getDelta()}
+async function startGame(){if(!renderer)init3D();$('start').disabled=true;$('start').textContent='CARREGANDO MODELOS 3D…';await Promise.race([humanLoadPromise,new Promise(resolve=>setTimeout(resolve,8000))]);$('start').disabled=false;$('start').textContent='INICIAR OPERAÇÃO →';resetGame();$('menu').style.display='none';$('end').style.display='none';$('hud').style.display='block';started=true;paused=false;renderer.domElement.requestPointerLock();clock.getDelta()}
 function resetGame(){for(const z of zombies)scene.remove(z.group);for(const b of bullets)scene.remove(b.mesh);zombies=[];bullets=[];player={x:0,z:5,yaw:0,pitch:0,hp:100};camera.position.set(0,1.72,5);camera.rotation.set(0,0,0);wave=1;kills=score=0;mag=30;reserve=120;reloadTime=fireTime=0;spawnLeft=8;spawnClock=.8;dead=false;paused=false;weaponGroup.position.set(.33,-.31,-.58);updateHUD();announce('ONDA 01')}
 function ellipsoid(parent,material,x,y,z,sx,sy,sz,detail=16){
  const m=new THREE.Mesh(new THREE.SphereGeometry(1,detail,Math.max(8,Math.floor(detail*.7))),material);
