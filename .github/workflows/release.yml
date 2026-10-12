@@ -2,8 +2,11 @@ name: Build and publish Windows release
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
   workflow_dispatch:
 
 permissions:
@@ -20,25 +23,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
 
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Build Windows installer
-        if: github.event_name == 'workflow_dispatch'
-        run: npm run dist
+      - name: Validate project configuration
+        run: node -e "const p=require('./package.json'); if(!p.version || !p.build || !p.build.publish) process.exit(1); console.log('Package',p.name,p.version)"
 
-      - name: Upload installer artifact
-        if: github.event_name == 'workflow_dispatch'
-        uses: actions/upload-artifact@v4
-        with:
-          name: Operacao-Zona-Morta-Windows-Installer
-          path: dist/*.exe
-          if-no-files-found: error
-          retention-days: 14
-
-      - name: Publish installer to GitHub Releases
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Build and publish Windows installer
         run: npm run release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
