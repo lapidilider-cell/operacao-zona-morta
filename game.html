@@ -161,7 +161,7 @@ function makeRiggedZombie(){
   if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(o.material){o.material=o.material.clone();o.material.color.set([0x667064,0x6b6252,0x59666c,0x77766c][Math.floor(Math.random()*4)]);}}
  });
  // Equipamento tático sobreposto ao modelo humano rigado.
- const shirt=makeFabricMaterial(heavy?0x343c32:0x3d463b,Math.floor(rand(1,9));
+ const shirt=makeFabricMaterial(heavy?0x343c32:0x3d463b,Math.floor(rand(1,9)));
  addTacticalDetails(group,size,shirt,shirt);
  const bone=name=>group.getObjectByName(name);
  const arms=[bone('upperarm_l'),bone('upperarm_r')].filter(Boolean);
