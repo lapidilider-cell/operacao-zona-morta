@@ -1,0 +1,65 @@
+{
+  "name": "operacao-zona-morta-inferno",
+  "version": "2.0.4",
+  "description": "Operação Zona Morta — Edição Inferno FPS 3D",
+  "main": "main.js",
+  "author": "LAPIDI",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lapidilider-cell/operacao-zona-morta.git"
+  },
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis --x64 --publish never",
+    "release": "electron-builder --win nsis --x64 --publish always"
+  },
+  "dependencies": {
+    "three": "0.160.0",
+    "electron-updater": "^6.6.2"
+  },
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.lapidi.operacaozonamorta.inferno",
+    "productName": "Operacao Zona Morta Inferno",
+    "asar": true,
+    "files": [
+      "main.js",
+      "game.html",
+      "package.json",
+      "node_modules/three/**/*",
+      "node_modules/electron-updater/**/*"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "artifactName": "Operacao-Zona-Morta-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Operação Zona Morta — Inferno",
+      "deleteAppDataOnUninstall": false
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "lapidilider-cell",
+        "repo": "operacao-zona-morta",
+        "releaseType": "release"
+      }
+    ]
+  }
+}
