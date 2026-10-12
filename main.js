@@ -4,6 +4,7 @@ const path = require('path');
 let mainWindow;
 let gameOpened = false;
 let updateState = 'checking';
+let updaterStarted = false;
 let checkTimeout;
 
 const splashHtml = `<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Atualizando</title><style>*{box-sizing:border-box}body{margin:0;height:100vh;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 35%,#17271e,#050807 72%);color:#eef5ed;font-family:Arial,sans-serif}.card{width:min(560px,90vw);padding:38px;border:1px solid #65794e;background:#08100ff2;box-shadow:0 0 70px #000}.eyebrow{font-size:11px;letter-spacing:4px;color:#d7ff57;font-weight:bold}.title{font-size:34px;font-weight:900;letter-spacing:-1px;margin:14px 0}.title span{color:#d7ff57}.status{color:#c1ccc3;line-height:1.5;min-height:42px}.bar{height:8px;background:#202b24;margin-top:24px;overflow:hidden}.fill{height:100%;width:30%;background:#d7ff57;animation:pulse 1.2s ease-in-out infinite alternate}@keyframes pulse{from{width:18%}to{width:82%}}.foot{font-size:10px;color:#809083;letter-spacing:2px;margin-top:22px}</style><div class="card"><div class="eyebrow">PROTOCOLO DE CONTENÇÃO</div><div class="title">OPERAÇÃO: <span>ZONA MORTA</span></div><div id="status" class="status">Verificando atualizações antes de iniciar o jogo…</div><div class="bar"><div class="fill"></div></div><div class="foot">NÃO FECHE ESTA JANELA DURANTE A ATUALIZAÇÃO</div></div></html>`;
@@ -47,7 +48,10 @@ async function configureAutoUpdates() {
 
   try {
     const { autoUpdater } = require('electron-updater');
+    if (updaterStarted) return;
+    updaterStarted = true;
     autoUpdater.autoDownload = true;
+    autoUpdater.autoInstallOnAppQuit = true;
     autoUpdater.autoInstallOnAppQuit = false;
     autoUpdater.allowPrerelease = false;
 
