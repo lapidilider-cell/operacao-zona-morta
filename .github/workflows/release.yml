@@ -12,6 +12,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: windows-release-publisher
+  cancel-in-progress: false
+
 jobs:
   build-windows:
     runs-on: windows-latest
@@ -28,20 +32,49 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Validate project configuration
-        run: node -e "const p=require('./package.json'); if(!p.version || !p.build || !p.build.publish) process.exit(1); console.log('Package',p.name,p.version)"
+        run: node -e "const p=require('./package.json'); if(!p.version || !p.build) process.exit(1); console.log('Package',p.name,p.version)"
 
-      - name: Create version tag for GitHub release
+      - name: Build Windows installer
+        run: npm run dist
+
+      - name: Verify installer exists
         shell: pwsh
+        run: |
+          $exe = Get-ChildItem -Path dist -Filter '*.exe' -File -Recurse | Select-Object -First 1
+          if (-not $exe) {
+            Write-Error 'BUILD FAILED: no Windows .exe installer was produced in dist/'
+            exit 1
+          }
+          Write-Host "Installer generated: $($exe.FullName) ($($exe.Length) bytes)"
+
+      - name: Publish installer and update metadata
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           $version = node -p "require('./package.json').version"
           $tag = "v$version"
           git fetch --tags origin
           if (-not (git tag --list $tag)) {
             git tag $tag
+            git push origin $tag
           }
-          git push origin $tag
 
-      - name: Build and publish Windows installer
-        run: npm run release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          $assets = @(Get-ChildItem -Path dist -File | Where-Object {
+            $_.Extension -eq '.exe' -or $_.Name -eq 'latest.yml' -or $_.Extension -eq '.blockmap'
+          })
+          $exe = $assets | Where-Object { $_.Extension -eq '.exe' } | Select-Object -First 1
+          if (-not $exe) { throw 'Installer EXE missing; refusing to publish an incomplete release.' }
+
+          gh release view $tag --repo "$env:GITHUB_REPOSITORY" 2>$null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag --repo "$env:GITHUB_REPOSITORY" --title "Operação Zona Morta $version" --notes "Instalador Windows da versão $version."
+            if ($LASTEXITCODE -ne 0) { throw 'Failed to create GitHub release.' }
+          }
+
+          foreach ($asset in $assets) {
+            gh release upload $tag $asset.FullName --repo "$env:GITHUB_REPOSITORY" --clobber
+            if ($LASTEXITCODE -ne 0) { throw "Failed to upload $($asset.Name)" }
+          }
+
+          gh release view $tag --repo "$env:GITHUB_REPOSITORY"
