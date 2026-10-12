@@ -37,6 +37,9 @@ button{font:inherit;font-weight:900;letter-spacing:1px;cursor:pointer;text-trans
  <button class="primary" id="start">INICIAR OPERAÇÃO →</button><div class="note">Modelo humano 3D rigado carregado de assets/human-base-rigged.glb, com fallback procedural se o arquivo estiver ausente. É necessário incluir o arquivo de modelo na pasta assets do projeto.</div>
  </div></div>
 <div class="overlay" id="end" style="display:none"><div class="card" style="max-width:520px;text-align:center"><div class="kicker">SINAL PERDIDO</div><h1>OPERADOR<br><em>NEUTRALIZADO</em></h1><p id="endText"></p><button class="primary" id="again">TENTAR NOVAMENTE ↻</button><button class="secondary" id="back">VOLTAR AO MENU</button></div></div>
+<script type="importmap">
+{"imports":{"three":"./node_modules/three/build/three.module.js"}}
+</script>
 <script type="module">
 import * as THREE from './node_modules/three/build/three.module.js';
 import { GLTFLoader } from './node_modules/three/examples/jsm/loaders/GLTFLoader.js';
@@ -45,8 +48,8 @@ import { clone as cloneSkinnedModel } from './node_modules/three/examples/jsm/ut
 let humanTemplate=null,resolveHumanLoad;
 const humanLoadPromise=new Promise(resolve=>{resolveHumanLoad=resolve});
 const humanLoader=new GLTFLoader();
-humanLoader.load('./assets/human-base-rigged.glb',gltf=>{
- humanTemplate=gltf.scene;
+humanLoader.load(new URL('./assets/human-base-rigged.glb', document.baseURI).href,gltf=>{
+ humanTemplate=gltf.scene; humanTemplate.updateMatrixWorld(true);
  humanTemplate.traverse(o=>{
   if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(o.material){o.material=o.material.clone();o.material.color.set(0x899087);o.material.roughness=.88;}}
  });
@@ -158,7 +161,7 @@ function makeRiggedZombie(){
  const a=rand(0,Math.PI*2),r=rand(17,23),x=Math.cos(a)*r,z=Math.sin(a)*r;
  const heavy=Math.random()<Math.min(.12+wave*.025,.38),size=heavy?1.12:rand(.91,1.06);
  const group=cloneSkinnedModel(humanTemplate);
- group.scale.setScalar(size);
+ group.scale.setScalar(size); group.rotation.y=Math.PI;
  group.traverse(o=>{
   if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(o.material){o.material=o.material.clone();o.material.color.set([0x667064,0x6b6252,0x59666c,0x77766c][Math.floor(Math.random()*4)]);}}
  });
