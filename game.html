@@ -160,9 +160,15 @@ function makeRiggedZombie(){
  group.traverse(o=>{
   if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(o.material){o.material=o.material.clone();o.material.color.set([0x667064,0x6b6252,0x59666c,0x77766c][Math.floor(Math.random()*4)]);}}
  });
- // Equipamento tático sobreposto ao modelo humano rigado.
- const shirt=makeFabricMaterial(heavy?0x343c32:0x3d463b,Math.floor(rand(1,9)));
- addTacticalDetails(group,size,shirt,shirt);
+ // Colete e bolsas presos ao modelo, sem depender de geometria global da arena.
+ const gear=mat(heavy?0x202720:0x2c352b,.94),strap=mat(0x121713,.98),metalGear=mat(0x687064,.55,.3);
+ const gearBox=(w,h,d,x,y,z,material)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;group.add(m);return m};
+ const vest=ellipsoid(group,gear,0,1.02*size,-.105*size,.255*size,.30*size,.075*size,16);
+ for(let i=-1;i<=1;i++)gearBox(.105*size,.13*size,.035*size,i*.13*size,.91*size,-.18*size,strap);
+ gearBox(.46*size,.035*size,.025*size,0,.73*size,-.13*size,strap);
+ gearBox(.07*size,.06*size,.025*size,.04*size,.73*size,-.15*size,metalGear);
+ for(const side of [-1,1]){gearBox(.055*size,.28*size,.035*size,side*.17*size,1.12*size,-.12*size,strap);ellipsoid(group,gear,side*.13*size,.32*size,0,.10*size,.085*size,.11*size,12);}
+
  const bone=name=>group.getObjectByName(name);
  const arms=[bone('upperarm_l'),bone('upperarm_r')].filter(Boolean);
  const legs=[bone('thigh_l'),bone('thigh_r')].filter(Boolean);
