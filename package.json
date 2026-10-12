@@ -1,6 +1,6 @@
 {
   "name": "operacao-zona-morta-inferno",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "Operação Zona Morta — FPS de sobrevivência independente",
   "main": "main.js",
   "author": "LAPIDI",
@@ -15,7 +15,8 @@
     "release": "electron-builder --win nsis --x64 --publish never"
   },
   "dependencies": {
-    "electron-updater": "^6.6.2"
+    "electron-updater": "^6.6.2",
+    "three": "0.160.0"
   },
   "devDependencies": {
     "electron": "^35.0.0",
@@ -27,10 +28,11 @@
     "asar": false,
     "files": [
       "main.js",
-      "game.html",
       "package.json",
       "assets/**/*",
-      "node_modules/electron-updater/**/*"
+      "node_modules/electron-updater/**/*",
+      "game3d.html",
+      "node_modules/three/**/*"
     ],
     "directories": {
       "output": "dist"
