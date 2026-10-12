@@ -71,9 +71,12 @@ button{font:inherit;font-weight:900;letter-spacing:1px;cursor:pointer;text-trans
 })();
 </script>
 <script type="module">
-import * as THREE from './node_modules/three/build/three.module.js';
-import { GLTFLoader } from './node_modules/three/examples/jsm/loaders/GLTFLoader.js';
-import { clone as cloneSkinnedModel } from './node_modules/three/examples/jsm/utils/SkeletonUtils.js';
+(async()=>{
+try {
+// Imports dinâmicos para que falhas de arquivos/módulos apareçam no diagnóstico da tela.
+const THREE = await import('./node_modules/three/build/three.module.js');
+const { GLTFLoader } = await import('./node_modules/three/examples/jsm/loaders/GLTFLoader.js');
+const { clone: cloneSkinnedModel } = await import('./node_modules/three/examples/jsm/utils/SkeletonUtils.js');
 (()=>{'use strict';
 let humanTemplate=null,resolveHumanLoad;
 const humanLoadPromise=new Promise(resolve=>{resolveHumanLoad=resolve});
@@ -320,6 +323,19 @@ $('start').onclick=startGame;$('again').onclick=startGame;$('back').onclick=()=>
 // O módulo foi executado e os eventos do menu foram registrados.
 window.__gameModuleReady=true;
 // A inicialização 3D acontece somente ao clicar em INICIAR OPERAÇÃO.
+})();
+} catch (error) {
+  const detail = error && (error.stack || error.message) ? (error.stack || error.message) : String(error);
+  if (window.__reportGameBootError) window.__reportGameBootError('Falha ao carregar o motor/módulos 3D:\\n' + detail);
+  else {
+    const showError = () => {
+      let box = document.getElementById('boot-diagnostic');
+      if (!box) { box = document.createElement('div'); box.id = 'boot-diagnostic'; box.style.cssText = 'position:fixed;z-index:99999;inset:auto 16px 16px;padding:14px;background:#2a0b10;border:1px solid #ff6678;color:#fff;font:13px/1.5 Arial,sans-serif;white-space:pre-wrap;overflow-wrap:anywhere;max-height:45vh;overflow:auto'; document.body.appendChild(box); }
+      box.textContent = 'ERRO AO CARREGAR O JOGO\\nFalha ao carregar o motor/módulos 3D:\\n' + detail;
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', showError, {once:true}); else showError();
+  }
+}
 })();
 </script>
 </body></html>
