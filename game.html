@@ -57,6 +57,7 @@ humanLoader.load(new URL('./assets/human-base-rigged.glb', document.baseURI).hre
  resolveHumanLoad(true);
 },undefined,error=>{console.error('Falha ao carregar modelo humano 3D; usando infectados procedurais.',error);resolveHumanLoad(false)});
 const $=id=>document.getElementById(id);let scene,camera,renderer,clock,player,weapon,weaponGroup,raycaster;
+let initialized=false,loopStarted=false;
 let started=false,dead=false,paused=false,chosenSkin=0,keys={},zombies=[],bullets=[],obstacles=[],decor=[],wave=1,kills=0,score=0,spawnLeft=0,spawnClock=0,mag=30,reserve=120,reloadTime=0,fireTime=0,damageFlash=0,hitCooldown=0,moveSpeed=5.5;
 const skins=[{body:0x53684b,vest:0x29372b,accent:0xc8ff3d},{body:0x477ba0,vest:0x1d3448,accent:0x76d8ff},{body:0x9a6541,vest:0x4b3023,accent:0xffc46a},{body:0x87918f,vest:0x252d30,accent:0xd5e6e2},{body:0x6f3c78,vest:0x211b2b,accent:0xff7cf3},{body:0x762c2f,vest:0x19191b,accent:0xff3b47}];
 const weaponFinishes=[{body:0x171c1a,metal:0x46514b,accent:0x252a25},{body:0x17221b,metal:0x92e83e,accent:0x263a22},{body:0x29191a,metal:0x8f3935,accent:0x201718},{body:0x1b252d,metal:0xa7d8ef,accent:0x283944}];let chosenWeapon=0;
@@ -122,7 +123,13 @@ async function startGame(){
  if(started)return;
  button.disabled=true;button.textContent='PREPARANDO OPERAÇÃO…';
  try{
-  if(!renderer)init3D();
+  if(!initialized){
+   // Se a inicialização 3D anterior falhou parcialmente, limpar recursos antes de tentar novamente.
+   if(renderer){try{renderer.dispose()}catch(_){};if(renderer.domElement?.parentNode)renderer.domElement.remove()}
+   renderer=null;scene=null;camera=null;clock=null;weaponGroup=null;
+   init3D();initialized=true;
+  }
+  if(!loopStarted){loopStarted=true;loop()}
   // O jogo não deve depender do download do modelo humano para iniciar.
   await Promise.race([humanLoadPromise,new Promise(resolve=>setTimeout(resolve,1800))]);
   resetGame();
@@ -280,7 +287,7 @@ document.addEventListener('keyup',e=>keys[e.code]=false);
 document.querySelectorAll('.skin').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.skin').forEach(x=>x.classList.remove('active'));b.classList.add('active');chosenSkin=+b.dataset.skin;let sk=skins[chosenSkin];materials.cloth.color.setHex(sk.vest);materials.zskin.color.setHex(sk.body);if(weaponGroup&&weapon){weapon.handMaterial?.color?.setHex(sk.body);weapon.sleeveMaterial?.color?.setHex(sk.vest)}}));
 document.querySelectorAll('.weapon-skin').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.weapon-skin').forEach(x=>x.classList.remove('active'));b.classList.add('active');chosenWeapon=+b.dataset.weapon;const f=weaponFinishes[chosenWeapon];if(weapon){weapon.body.material.color.setHex(f.body);weapon.receiver.material.color.setHex(f.metal);weapon.barrel.material.color.setHex(f.body);weapon.magMesh.material.color.setHex(f.accent);weapon.rail.material.color.setHex(f.metal)}}));
 $('start').onclick=startGame;$('again').onclick=startGame;$('back').onclick=()=>{document.exitPointerLock?.();$('end').style.display='none';$('menu').style.display='flex';$('hud').style.display='none';started=false};
-try{init3D();loop()}catch(e){console.error(e);$('menu').querySelector('.note').textContent='Não foi possível iniciar o 3D. Confira sua conexão e abra o arquivo no Chrome ou Edge.'}
+// A inicialização 3D acontece somente ao clicar em INICIAR OPERAÇÃO, para que qualquer erro apareça no próprio menu e possa ser corrigido/repetido.
 })();
 </script>
 </body></html>
